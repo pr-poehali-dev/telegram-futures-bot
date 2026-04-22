@@ -1,0 +1,20 @@
+{
+  "tests": [
+    {
+      "name": "Get tickers",
+      "method": "GET",
+      "path": "/?action=tickers&symbols=BTCUSDT,ETHUSDT",
+      "expectedStatus": 200,
+      "expectedBody": {"data": []},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Get klines BTC 4H",
+      "method": "GET",
+      "path": "/?action=klines&symbol=BTCUSDT&interval=240&limit=100",
+      "expectedStatus": 200,
+      "expectedBody": {"candles": [], "indicators": {}},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
