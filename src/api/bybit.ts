@@ -65,38 +65,57 @@ export interface Trade {
 
 const SYMBOLS = "BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT,XRPUSDT,ADAUSDT";
 
+async function apiFetch(url: string) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 export async function fetchTickers(): Promise<Ticker[]> {
-  const res = await fetch(`${MARKET_URL}?action=tickers&symbols=${SYMBOLS}`);
-  const data = await res.json();
-  return data.data || [];
+  try {
+    const data = await apiFetch(`${MARKET_URL}?action=tickers&symbols=${SYMBOLS}`);
+    return data.data || [];
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchKlines(
   symbol: string,
   interval: string = "240",
   limit: number = 100
-): Promise<{ candles: Candle[]; indicators: Indicators }> {
-  const res = await fetch(
-    `${MARKET_URL}?action=klines&symbol=${symbol}&interval=${interval}&limit=${limit}`
-  );
-  return res.json();
+): Promise<{ candles: Candle[]; indicators: Indicators | null }> {
+  try {
+    return await apiFetch(`${MARKET_URL}?action=klines&symbol=${symbol}&interval=${interval}&limit=${limit}`);
+  } catch {
+    return { candles: [], indicators: null };
+  }
 }
 
-export async function fetchBalance(): Promise<Balance> {
-  const res = await fetch(`${ACCOUNT_URL}?action=balance`);
-  return res.json();
+export async function fetchBalance(): Promise<Balance | null> {
+  try {
+    return await apiFetch(`${ACCOUNT_URL}?action=balance`);
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchPositions(): Promise<Position[]> {
-  const res = await fetch(`${ACCOUNT_URL}?action=positions`);
-  const data = await res.json();
-  return data.positions || [];
+  try {
+    const data = await apiFetch(`${ACCOUNT_URL}?action=positions`);
+    return data.positions || [];
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchTradeHistory(limit: number = 20): Promise<Trade[]> {
-  const res = await fetch(`${ACCOUNT_URL}?action=history&limit=${limit}`);
-  const data = await res.json();
-  return data.trades || [];
+  try {
+    const data = await apiFetch(`${ACCOUNT_URL}?action=history&limit=${limit}`);
+    return data.trades || [];
+  } catch {
+    return [];
+  }
 }
 
 export function intervalToMinutes(tf: string): string {

@@ -196,7 +196,7 @@ export default function Analysis() {
                       fill="hsl(142 76% 45% / 0.08)"
                       dot={false}
                     />
-                    <Bar dataKey="volume" fill="hsl(142 76% 45% / 0.2)" yAxisId="vol" />
+                    <Bar dataKey="volume" fill="hsl(142 76% 45% / 0.15)" />
                   </ComposedChart>
                 </ResponsiveContainer>
               )}
