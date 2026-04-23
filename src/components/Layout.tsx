@@ -17,8 +17,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
+      {/* Десктоп сайдбар */}
       <aside
-        className={`flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-200 ${collapsed ? "w-16" : "w-52"}`}
+        className={`hidden md:flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-200 ${collapsed ? "w-16" : "w-52"}`}
       >
         <div className="flex items-center justify-between px-3 py-4 border-b border-sidebar-border">
           {!collapsed && (
@@ -97,9 +98,54 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-auto">
+      {/* Основной контент */}
+      <main className="flex-1 overflow-auto pb-20 md:pb-0">
+        {/* Мобильный хедер */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-background sticky top-0 z-10">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded bg-primary flex items-center justify-center">
+              <Icon name="TrendingUp" size={14} className="text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-sm text-foreground">TradeBot</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-xs text-muted-foreground">Live</span>
+          </div>
+        </div>
+
         {children}
       </main>
+
+      {/* Мобильная нижняя навигация */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-20 bg-background border-t border-border flex items-center">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center py-2.5 gap-1 relative transition-colors ${
+                isActive ? "text-primary" : "text-muted-foreground"
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <div className="relative">
+                  <Icon name={item.icon} size={20} />
+                  {item.badge && !isActive && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary" />
+                  )}
+                </div>
+                <span className="text-[10px] leading-none font-medium">{item.label}</span>
+                {isActive && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-primary" />
+                )}
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }

@@ -34,7 +34,7 @@ export default function Positions() {
   const totalPnl = positions.reduce((acc, p) => acc + p.pnl, 0);
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Активные позиции</h1>
@@ -53,7 +53,7 @@ export default function Positions() {
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
         {loading && !balance ? (
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-lg" />)
         ) : (
@@ -146,7 +146,7 @@ export default function Positions() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-5 gap-4 mb-4">
+                  <div className="grid grid-cols-3 md:grid-cols-5 gap-3 md:gap-4 mb-4">
                     {[
                       { label: "Размер", value: `${pos.size}` },
                       { label: "Вход", value: `$${pos.entry.toLocaleString()}` },

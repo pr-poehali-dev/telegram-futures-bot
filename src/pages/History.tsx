@@ -49,7 +49,7 @@ export default function History() {
   }));
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-foreground">История сделок</h1>
@@ -64,7 +64,7 @@ export default function History() {
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
         {[
           { label: "Всего сделок", value: trades.length.toString(), icon: "Clock", color: "text-foreground" },
           { label: "Общий PnL", value: `${totalPnl >= 0 ? "+" : ""}${totalPnl.toFixed(2)} USDT`, icon: "DollarSign", color: totalPnl >= 0 ? "text-green-400" : "text-red-400" },
@@ -85,8 +85,8 @@ export default function History() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
-        <div className="col-span-2 space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+        <div className="md:col-span-2 space-y-4">
           {chartData.length > 0 && (
             <Card className="bg-card border-border">
               <CardHeader className="pb-2 pt-4 px-5">

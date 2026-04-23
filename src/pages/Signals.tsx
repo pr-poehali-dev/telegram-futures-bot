@@ -55,7 +55,7 @@ export default function Signals() {
   };
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Торговые сигналы</h1>
@@ -67,7 +67,7 @@ export default function Signals() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
         {[
           { label: "Всего сигналов", value: stats.total, icon: "Zap", color: "text-blue-400" },
           { label: "Активных", value: stats.active, icon: "Activity", color: "text-green-400" },
@@ -148,7 +148,7 @@ export default function Signals() {
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-4 gap-4">
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Вход</div>
                     <div className="font-mono font-semibold text-foreground">${signal.entry.toLocaleString()}</div>

@@ -57,7 +57,7 @@ export default function Alerts() {
   const markRead = (id: number) => setLocalAlerts((prev) => prev.map((a) => a.id === id ? { ...a, read: true } : a));
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Оповещения</h1>
@@ -75,8 +75,8 @@ export default function Alerts() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
-        <div className="col-span-2 space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+        <div className="md:col-span-2 space-y-3">
           {localAlerts.map((alert) => {
             const config = priorityConfig[alert.priority as keyof typeof priorityConfig];
             const icon = typeIcons[alert.type as keyof typeof typeIcons];
