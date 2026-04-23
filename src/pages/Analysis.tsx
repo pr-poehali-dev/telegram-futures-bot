@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +25,7 @@ import {
   intervalToMinutes,
   symbolToRaw,
 } from "@/api/bybit";
+import { sendSignalNotification } from "@/api/telegram";
 
 const timeframes = ["1m", "5m", "15m", "1H", "4H", "1D", "1W"];
 
@@ -36,6 +37,7 @@ export default function Analysis() {
   const [indicators, setIndicators] = useState<Indicators | null>(null);
   const [loadingTickers, setLoadingTickers] = useState(true);
   const [loadingChart, setLoadingChart] = useState(true);
+  const lastSignalRef = useRef<string>("hold");
 
   useEffect(() => {
     const load = async () => {
@@ -59,11 +61,34 @@ export default function Analysis() {
       const interval = intervalToMinutes(timeframe);
       const data = await fetchKlines(raw, interval, 100);
       setCandles(data.candles || []);
-      setIndicators(data.indicators || null);
+      const ind = data.indicators || null;
+      setIndicators(ind);
+
+      if (ind) {
+        const { rsi, macd } = ind;
+        let newSignal: "buy" | "sell" | "hold" = "hold";
+        if (rsi < 35 && macd.trend === "bullish") newSignal = "buy";
+        else if (rsi > 65 && macd.trend === "bearish") newSignal = "sell";
+
+        if (newSignal !== "hold" && newSignal !== lastSignalRef.current) {
+          const tickerPrice = tickers.find((t) => t.symbol === selectedSymbol)?.price ?? 0;
+          sendSignalNotification({
+            symbol: selectedSymbol,
+            signal: newSignal,
+            price: tickerPrice,
+            rsi: ind.rsi,
+            macd_trend: ind.macd.trend,
+            timeframe,
+            ema50: ind.ema50,
+            trend: ind.trend,
+          });
+        }
+        lastSignalRef.current = newSignal;
+      }
     } finally {
       setLoadingChart(false);
     }
-  }, [selectedSymbol, timeframe]);
+  }, [selectedSymbol, timeframe, tickers]);
 
   useEffect(() => {
     loadKlines();

@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { alerts } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import Icon from "@/components/ui/icon";
+import { checkTelegramStatus, sendTestMessage } from "@/api/telegram";
 
 const priorityConfig = {
   critical: { bg: "border-red-400/40 bg-red-400/5", badge: "text-red-400 border-red-400/30 bg-red-400/10", label: "Критично", icon: "AlertTriangle" },
@@ -14,19 +16,8 @@ const priorityConfig = {
   low: { bg: "border-border bg-card", badge: "text-muted-foreground border-border", label: "Низкий", icon: "Bell" },
 };
 
-const typeIcons = {
-  signal: "Zap",
-  risk: "AlertTriangle",
-  tp: "Target",
-  info: "Info",
-};
-
-const typeLabels = {
-  signal: "Сигнал",
-  risk: "Риск",
-  tp: "Take Profit",
-  info: "Информация",
-};
+const typeIcons = { signal: "Zap", risk: "AlertTriangle", tp: "Target", info: "Info" };
+const typeLabels = { signal: "Сигнал", risk: "Риск", tp: "Take Profit", info: "Информация" };
 
 export default function Alerts() {
   const [localAlerts, setLocalAlerts] = useState(alerts);
@@ -40,15 +31,30 @@ export default function Alerts() {
     info: false,
   });
 
+  const [tgStatus, setTgStatus] = useState<{ ok: boolean; bot?: string; error?: string } | null>(null);
+  const [tgLoading, setTgLoading] = useState(true);
+  const [testSending, setTestSending] = useState(false);
+  const [testResult, setTestResult] = useState<"success" | "error" | null>(null);
+
+  useEffect(() => {
+    checkTelegramStatus().then((s) => {
+      setTgStatus(s);
+      setTgLoading(false);
+    });
+  }, []);
+
+  const handleTest = async () => {
+    setTestSending(true);
+    setTestResult(null);
+    const res = await sendTestMessage();
+    setTestResult(res.ok ? "success" : "error");
+    setTestSending(false);
+    setTimeout(() => setTestResult(null), 4000);
+  };
+
   const unread = localAlerts.filter((a) => !a.read).length;
-
-  const markAllRead = () => {
-    setLocalAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
-  };
-
-  const markRead = (id: number) => {
-    setLocalAlerts((prev) => prev.map((a) => a.id === id ? { ...a, read: true } : a));
-  };
+  const markAllRead = () => setLocalAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
+  const markRead = (id: number) => setLocalAlerts((prev) => prev.map((a) => a.id === id ? { ...a, read: true } : a));
 
   return (
     <div className="p-6 space-y-5">
@@ -94,9 +100,7 @@ export default function Alerts() {
                         <Badge variant="outline" className="text-xs border border-border text-muted-foreground h-5 px-1.5">
                           {typeLabels[alert.type as keyof typeof typeLabels]}
                         </Badge>
-                        {!alert.read && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary ml-auto" />
-                        )}
+                        {!alert.read && <div className="w-1.5 h-1.5 rounded-full bg-primary ml-auto" />}
                       </div>
                       <p className="text-sm text-foreground/90">{alert.message}</p>
                       <div className="text-xs text-muted-foreground font-mono mt-1">{alert.time}</div>
@@ -111,11 +115,60 @@ export default function Alerts() {
         <div className="space-y-4">
           <Card className="bg-card border-border">
             <CardHeader className="pb-3 pt-4 px-5">
+              <CardTitle className="text-sm font-medium">Telegram бот</CardTitle>
+            </CardHeader>
+            <CardContent className="px-5 pb-5 space-y-4">
+              <div className={`p-3 rounded-lg border flex items-center gap-3 ${tgLoading ? "border-border" : tgStatus?.ok ? "border-green-400/30 bg-green-400/5" : "border-red-400/30 bg-red-400/5"}`}>
+                {tgLoading ? (
+                  <Skeleton className="h-8 w-full" />
+                ) : (
+                  <>
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${tgStatus?.ok ? "bg-green-400" : "bg-red-400"}`} />
+                    <div className="min-w-0">
+                      <div className={`text-sm font-medium ${tgStatus?.ok ? "text-green-400" : "text-red-400"}`}>
+                        {tgStatus?.ok ? "Подключён" : "Не настроен"}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {tgStatus?.bot ? tgStatus.bot : tgStatus?.error || "Добавьте токен бота"}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <Button
+                onClick={handleTest}
+                disabled={testSending || !tgStatus?.ok}
+                size="sm"
+                className="w-full h-8 text-xs"
+                variant={testResult === "success" ? "default" : testResult === "error" ? "destructive" : "outline"}
+              >
+                {testSending ? (
+                  <><Icon name="Loader" size={12} className="mr-1.5 animate-spin" />Отправка...</>
+                ) : testResult === "success" ? (
+                  <><Icon name="Check" size={12} className="mr-1.5" />Отправлено!</>
+                ) : testResult === "error" ? (
+                  <><Icon name="X" size={12} className="mr-1.5" />Ошибка отправки</>
+                ) : (
+                  <><Icon name="Send" size={12} className="mr-1.5" />Отправить тест</>
+                )}
+              </Button>
+
+              <div className="text-xs text-muted-foreground leading-relaxed">
+                {tgStatus?.ok
+                  ? "Бот активен. Сигналы BUY/SELL будут приходить автоматически при изменении RSI/MACD."
+                  : "Добавьте TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в настройки проекта для активации."}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader className="pb-3 pt-4 px-5">
               <CardTitle className="text-sm font-medium">Каналы уведомлений</CardTitle>
             </CardHeader>
             <CardContent className="px-5 pb-5 space-y-4">
               {[
-                { key: "telegram", label: "Telegram", icon: "Send", desc: "Мгновенные сообщения" },
+                { key: "telegram", label: "Telegram", icon: "Send", desc: tgStatus?.ok ? `@${tgStatus.bot}` : "Не настроен" },
                 { key: "email", label: "Email", icon: "Mail", desc: "На почту" },
                 { key: "browser", label: "Браузер", icon: "Monitor", desc: "Push-уведомления" },
               ].map((channel) => (
@@ -167,10 +220,10 @@ export default function Alerts() {
             </CardHeader>
             <CardContent className="px-5 pb-5 space-y-2 text-sm">
               {[
-                { label: "Сегодня", value: "12 уведомлений" },
-                { label: "За неделю", value: "84 уведомлений" },
-                { label: "Сигналов", value: "23" },
-                { label: "Рисков", value: "8" },
+                { label: "Сегодня", value: `${localAlerts.length} уведомлений` },
+                { label: "Непрочитанных", value: `${unread}` },
+                { label: "Сигналов", value: `${localAlerts.filter(a => a.type === "signal").length}` },
+                { label: "Рисков", value: `${localAlerts.filter(a => a.type === "risk").length}` },
               ].map((s) => (
                 <div key={s.label} className="flex justify-between py-1.5 border-b border-border/40">
                   <span className="text-muted-foreground">{s.label}</span>
