@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Icon from "@/components/ui/icon";
+import { sendSignalNotification } from "@/api/telegram";
 
 const riskColors = {
   low: { bg: "bg-green-400/10 border-green-400/30", text: "text-green-400", label: "Низкий" },
@@ -25,6 +26,21 @@ export default function Signals() {
   const [modeFilter, setModeFilter] = useState<"all" | "auto" | "notify">("all");
   const [notifyEnabled, setNotifyEnabled] = useState<Record<number, boolean>>({});
   const [autoEnabled, setAutoEnabled] = useState<Record<number, boolean>>({});
+
+  const toggleNotify = (signal: typeof signals[0]) => {
+    const isEnabled = !notifyEnabled[signal.id];
+    setNotifyEnabled((prev) => ({ ...prev, [signal.id]: isEnabled }));
+    if (isEnabled) {
+      sendSignalNotification({
+        symbol: signal.symbol,
+        signal: signal.type as "buy" | "sell",
+        price: signal.entry,
+        rsi: 0,
+        macd_trend: "—",
+        timeframe: signal.timeframe,
+      });
+    }
+  };
 
   const filtered = signals.filter((s) => {
     if (filter !== "all" && s.type !== filter) return false;
@@ -171,7 +187,7 @@ export default function Signals() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setNotifyEnabled((prev) => ({ ...prev, [signal.id]: !prev[signal.id] }))}
+                          onClick={() => toggleNotify(signal)}
                           className={`h-7 text-xs transition-all ${notifyEnabled[signal.id] ? "border-primary/50 bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
                         >
                           <Icon name={notifyEnabled[signal.id] ? "BellRing" : "Bell"} size={12} className="mr-1" />
