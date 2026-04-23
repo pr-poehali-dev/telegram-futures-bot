@@ -1,5 +1,6 @@
 const MARKET_URL = "https://functions.poehali.dev/73ae1155-af5b-4d58-8423-3716c440ca19";
 const ACCOUNT_URL = "https://functions.poehali.dev/6cd02f46-638b-4425-b0f7-4116dad006f6";
+const SIGNALS_URL = "https://functions.poehali.dev/d0ba7b55-3eab-4ac3-81db-27c02cff8a79";
 
 export interface Ticker {
   symbol: string;
@@ -113,6 +114,36 @@ export async function fetchTradeHistory(limit: number = 20): Promise<Trade[]> {
   try {
     const data = await apiFetch(`${ACCOUNT_URL}?action=history&limit=${limit}`);
     return data.trades || [];
+  } catch {
+    return [];
+  }
+}
+
+export interface Signal {
+  id: number;
+  symbol: string;
+  raw_symbol: string;
+  type: "buy" | "sell";
+  timeframe: string;
+  entry: number;
+  tp1: number;
+  tp2: number;
+  sl: number;
+  riskLevel: "low" | "medium" | "high";
+  rr: string;
+  confidence: number;
+  reason: string;
+  rsi: number;
+  macd_trend: string;
+  ema50: number;
+  time: number;
+  status: "active" | "pending" | "closed";
+}
+
+export async function fetchSignals(interval: string = "240"): Promise<Signal[]> {
+  try {
+    const data = await apiFetch(`${SIGNALS_URL}?interval=${interval}`);
+    return data.signals || [];
   } catch {
     return [];
   }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,25 +9,51 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import Icon from "@/components/ui/icon";
 
+function load<T>(key: string, def: T): T {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; }
+}
+function save<T>(key: string, val: T) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { console.warn(e); }
+}
+
 export default function Settings() {
   const [apiConnected, setApiConnected] = useState(true);
-  const [rsiPeriod, setRsiPeriod] = useState(14);
-  const [macdFast, setMacdFast] = useState(12);
-  const [macdSlow, setMacdSlow] = useState(26);
-  const [macdSignal, setMacdSignal] = useState(9);
-  const [maxRisk, setMaxRisk] = useState([2]);
-  const [maxPositions, setMaxPositions] = useState([5]);
-  const [defaultLeverage, setDefaultLeverage] = useState("3");
-  const [autoTrade, setAutoTrade] = useState(false);
-  const [autoSl, setAutoSl] = useState(true);
-  const [autoTp, setAutoTp] = useState(true);
-  const [trailingStop, setTrailingStop] = useState(false);
-  const [pairs, setPairs] = useState(["BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT"]);
-  const [apiKey, setApiKey] = useState("••••••••••••••••••••••••••••••••");
-  const [apiSecret, setApiSecret] = useState("••••••••••••••••••••••••••••••••");
+  const [rsiPeriod, setRsiPeriod] = useState(() => load("s_rsiPeriod", 14));
+  const [macdFast, setMacdFast] = useState(() => load("s_macdFast", 12));
+  const [macdSlow, setMacdSlow] = useState(() => load("s_macdSlow", 26));
+  const [macdSignal, setMacdSignal] = useState(() => load("s_macdSignal", 9));
+  const [maxRisk, setMaxRisk] = useState(() => load("s_maxRisk", [2]));
+  const [maxPositions, setMaxPositions] = useState(() => load("s_maxPositions", [5]));
+  const [defaultLeverage, setDefaultLeverage] = useState(() => load("s_leverage", "3"));
+  const [autoTrade, setAutoTrade] = useState(() => load("s_autoTrade", false));
+  const [autoSl, setAutoSl] = useState(() => load("s_autoSl", true));
+  const [autoTp, setAutoTp] = useState(() => load("s_autoTp", true));
+  const [trailingStop, setTrailingStop] = useState(() => load("s_trailingStop", false));
+  const [pairs, setPairs] = useState(() => load("s_pairs", ["BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT"]));
+  const [apiKey] = useState("••••••••••••••••••••••••••••••••");
+  const [apiSecret] = useState("••••••••••••••••••••••••••••••••");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => { save("s_rsiPeriod", rsiPeriod); }, [rsiPeriod]);
+  useEffect(() => { save("s_macdFast", macdFast); }, [macdFast]);
+  useEffect(() => { save("s_macdSlow", macdSlow); }, [macdSlow]);
+  useEffect(() => { save("s_macdSignal", macdSignal); }, [macdSignal]);
+  useEffect(() => { save("s_maxRisk", maxRisk); }, [maxRisk]);
+  useEffect(() => { save("s_maxPositions", maxPositions); }, [maxPositions]);
+  useEffect(() => { save("s_leverage", defaultLeverage); }, [defaultLeverage]);
+  useEffect(() => { save("s_autoTrade", autoTrade); }, [autoTrade]);
+  useEffect(() => { save("s_autoSl", autoSl); }, [autoSl]);
+  useEffect(() => { save("s_autoTp", autoTp); }, [autoTp]);
+  useEffect(() => { save("s_trailingStop", trailingStop); }, [trailingStop]);
+  useEffect(() => { save("s_pairs", pairs); }, [pairs]);
 
   const removePair = (pair: string) => {
     setPairs((prev) => prev.filter((p) => p !== pair));
+  };
+
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
@@ -258,9 +284,9 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-            <Icon name="Save" size={14} className="mr-2" />
-            Сохранить настройки
+          <Button onClick={handleSave} className={`w-full text-primary-foreground transition-all ${saved ? "bg-green-500 hover:bg-green-600" : "bg-primary hover:bg-primary/90"}`}>
+            <Icon name={saved ? "Check" : "Save"} size={14} className="mr-2" />
+            {saved ? "Сохранено!" : "Сохранить настройки"}
           </Button>
         </div>
       </div>

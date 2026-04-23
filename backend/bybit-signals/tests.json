@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "Get signals 4H",
+      "method": "GET",
+      "path": "/?interval=240",
+      "expectedStatus": 200,
+      "expectedBody": {"signals": [], "total": 0},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

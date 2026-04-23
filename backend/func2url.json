@@ -1,4 +1,5 @@
 {
+  "bybit-signals": "https://functions.poehali.dev/d0ba7b55-3eab-4ac3-81db-27c02cff8a79",
   "telegram-notify": "https://functions.poehali.dev/c24d31ba-1cf3-410d-89dd-55e6aec3f3c6",
   "bybit-market": "https://functions.poehali.dev/73ae1155-af5b-4d58-8423-3716c440ca19",
   "bybit-account": "https://functions.poehali.dev/6cd02f46-638b-4425-b0f7-4116dad006f6"
