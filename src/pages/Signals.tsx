@@ -23,6 +23,8 @@ const statusLabels = { active: "Активный", pending: "Ожидание", 
 export default function Signals() {
   const [filter, setFilter] = useState<"all" | "buy" | "sell">("all");
   const [modeFilter, setModeFilter] = useState<"all" | "auto" | "notify">("all");
+  const [notifyEnabled, setNotifyEnabled] = useState<Record<number, boolean>>({});
+  const [autoEnabled, setAutoEnabled] = useState<Record<number, boolean>>({});
 
   const filtered = signals.filter((s) => {
     if (filter !== "all" && s.type !== filter) return false;
@@ -166,13 +168,22 @@ export default function Signals() {
                   <div className="flex gap-2">
                     {signal.status !== "closed" && (
                       <>
-                        <Button variant="outline" size="sm" className="h-7 text-xs border-border text-muted-foreground hover:text-foreground">
-                          <Icon name="Bell" size={12} className="mr-1" />
-                          Уведомить
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setNotifyEnabled((prev) => ({ ...prev, [signal.id]: !prev[signal.id] }))}
+                          className={`h-7 text-xs transition-all ${notifyEnabled[signal.id] ? "border-primary/50 bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
+                        >
+                          <Icon name={notifyEnabled[signal.id] ? "BellRing" : "Bell"} size={12} className="mr-1" />
+                          {notifyEnabled[signal.id] ? "Уведомления вкл" : "Уведомить"}
                         </Button>
-                        <Button size="sm" className="h-7 text-xs bg-primary hover:bg-primary/90 text-primary-foreground">
-                          <Icon name="Zap" size={12} className="mr-1" />
-                          Авто-ордер
+                        <Button
+                          size="sm"
+                          onClick={() => setAutoEnabled((prev) => ({ ...prev, [signal.id]: !prev[signal.id] }))}
+                          className={`h-7 text-xs transition-all ${autoEnabled[signal.id] ? "bg-green-500 hover:bg-green-600 text-white" : "bg-primary hover:bg-primary/90 text-primary-foreground"}`}
+                        >
+                          <Icon name={autoEnabled[signal.id] ? "CheckCircle" : "Zap"} size={12} className="mr-1" />
+                          {autoEnabled[signal.id] ? "Авто-ордер вкл" : "Авто-ордер"}
                         </Button>
                       </>
                     )}
