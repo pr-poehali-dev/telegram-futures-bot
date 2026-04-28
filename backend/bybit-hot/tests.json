@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "Get hot coins",
+      "method": "GET",
+      "path": "/?",
+      "expectedStatus": 200,
+      "expectedBody": {"hot": []},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

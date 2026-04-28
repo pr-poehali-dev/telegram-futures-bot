@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Analysis from "@/pages/Analysis";
+import Hot from "@/pages/Hot";
 import Signals from "@/pages/Signals";
 import Positions from "@/pages/Positions";
 import History from "@/pages/History";
@@ -26,6 +27,14 @@ const App = () => (
             element={
               <Layout>
                 <Analysis />
+              </Layout>
+            }
+          />
+          <Route
+            path="/hot"
+            element={
+              <Layout>
+                <Hot />
               </Layout>
             }
           />

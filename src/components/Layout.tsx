@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 
 const navItems = [
   { path: "/", label: "Анализ", icon: "BarChart2" },
+  { path: "/hot", label: "Горячие", icon: "Flame" },
   { path: "/signals", label: "Сигналы", icon: "Zap", badge: 3 },
   { path: "/positions", label: "Позиции", icon: "Layers", badge: 2 },
   { path: "/history", label: "История", icon: "Clock" },
